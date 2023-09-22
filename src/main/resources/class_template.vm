@@ -1,0 +1,8 @@
+#set($packageName = "org.example")
+package ${packageName};
+
+public class ${className} {
+#foreach ($fieldName in $schemaFields)
+    public String ${fieldName};
+#end
+}

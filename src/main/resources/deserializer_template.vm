@@ -1,0 +1,28 @@
+package org.example;
+
+public class ${className}Deserialiser {
+    public $className parse(String lineFeed) {
+        $className record = new $className();
+        if (lineFeed != null) {
+            int length = lineFeed.length();
+            #foreach ($fieldData in $fieldDataList)
+            record.${fieldData.fieldName} = extractSubstring(lineFeed, ${fieldData.startPosition}, ${fieldData.endPosition}, length);
+            #end
+        } else {
+            // Handle cases where the input is null.
+            // Set default values or leave them as null as needed.
+            #foreach ($fieldData in $fieldDataList)
+            record.${fieldData.fieldName} = "";
+            #end
+        }
+        return record;
+    }
+
+    private String extractSubstring(String input, int startIndex, int endIndex, int length) {
+        if (startIndex >= length) {
+            return "";
+        }
+        int actualEndIndex = Math.min(endIndex, length);
+        return input.substring(startIndex, actualEndIndex).trim();
+    }
+}

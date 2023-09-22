@@ -21,7 +21,7 @@ public class ClassGeneratorTest {
             assertTrue(generatedClass.contains("public String " + field.fieldName + ";"));
         }
 
-        // Test for a class with different field types (you can adjust this based on your requirements)
+        // Test for a class with different field types
         List<SchemaField> fieldsWithDifferentTypes = new ArrayList<>();
         fieldsWithDifferentTypes.add(new SchemaField("field1", 0, 10));
         fieldsWithDifferentTypes.add(new SchemaField("field2", 11, 20));

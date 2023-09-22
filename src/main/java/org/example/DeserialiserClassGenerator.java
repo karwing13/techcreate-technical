@@ -1,45 +1,40 @@
 package org.example;
 
+import org.apache.velocity.Template;
+import org.apache.velocity.VelocityContext;
+import org.apache.velocity.app.VelocityEngine;
+
+import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class DeserialiserClassGenerator {
     public static String generateDeserialiser(String className, List<SchemaField> schemaFields) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("package org.example;\n");
-        sb.append("public class ").append(className).append("Deserialiser {\n");
-        sb.append("  public ").append(className).append(" parse(String lineFeed) {\n");
-        sb.append("    ").append(className).append(" record = new ").append(className).append("();\n");
-        sb.append("    if (lineFeed != null) {\n");
-        sb.append("      int length = lineFeed.length();\n");
-
+        List<Map<String, Object>> fieldDataList = new ArrayList<>();
         for (SchemaField field : schemaFields) {
-            sb.append("      record.").append(field.fieldName).append(" = ");
-            sb.append("extractSubstring(lineFeed, ").append(field.startPosition).append(", ");
-            sb.append(field.endPosition).append(", length);\n");
+            Map<String, Object> fieldData = new HashMap<>();
+            fieldData.put("fieldName", field.fieldName);
+            fieldData.put("startPosition", field.startPosition);
+            fieldData.put("endPosition", field.endPosition);
+            fieldDataList.add(fieldData);
         }
 
-        sb.append("    } else {\n");
-        sb.append("      // Handle cases where the input is null.\n");
-        sb.append("      // Set default values or leave them as null as needed.\n");
+        VelocityEngine ve = new VelocityEngine();
+        ve.setProperty("resource.loader", "class");
+        ve.setProperty("class.resource.loader.class", "org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
+        ve.init();
 
-        for (SchemaField field : schemaFields) {
-            sb.append("      record.").append(field.fieldName).append(" = \"\";\n");
-        }
+        VelocityContext context = new VelocityContext();
+        context.put("className", className);
+        context.put("fieldDataList", fieldDataList);
 
-        sb.append("    }\n");
-        sb.append("    return record;\n");
-        sb.append("  }\n");
-        sb.append("\n");
+        Template template = ve.getTemplate("deserializer_template.vm");
 
-        sb.append("  private String extractSubstring(String input, int startIndex, int endIndex, int length) {\n");
-        sb.append("    if (startIndex >= length) {\n");
-        sb.append("      return \"\";\n");
-        sb.append("    }\n");
-        sb.append("    int actualEndIndex = Math.min(endIndex, length);\n");
-        sb.append("    return input.substring(startIndex, actualEndIndex).trim();\n");
-        sb.append("  }\n");
-        sb.append("}");
+        StringWriter writer = new StringWriter();
+        template.merge(context, writer);
 
-        return sb.toString();
+        return writer.toString();
     }
 }
